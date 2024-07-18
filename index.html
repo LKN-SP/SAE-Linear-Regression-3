@@ -1,1 +1,224 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exploring R-squared</title>
+    <style>
+		div {
+			width: 1080px;
+            height: 720px;
+			border: 0px solid #fcc;
+			opacity: 1;
+		}
+        canvas {
+            width: 1080px;
+            height: 720px;
+            background-color: "transparent";
+			border: 0px solid #ccc;
+			opacity: 1;
+        }
+		table, th, td {
+            border: 1px solid #ccc;
+            padding: 0px;
+            text-align: center;
+        }
+		th, td {
+			width: 60px;
+			height: 20px;
+        }
+		th {
+			height: 30px;
+        }
+		.axis_label {
+			width: 40px;
+			height: 40px;
+			border: 0px solid #ccc;
+			background-color: "transparent";
+			position: absolute;
+			display: flex;
+			text-align: center;
+			justify-content: center;
+            align-items: center;
+		}
+		.equation_label {
+			top: 0px;
+			height: 40px;
+			position: absolute; 
+			font-size: 20px;
+		}
+        .cp {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid #333;
+            background-color: #585;
+            position: absolute;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+		.cp:active {
+            background-color: #6b6;
+        }
+		.dp {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            border: 2px solid #333;
+            background-color: #00A2E8;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+		.instruction_label {
+			width: 80px;
+			height: 32px;
+			font-size: 20px;
+			position: absolute;
+			display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+		}
+		.guiding_label {
+			width: 200px;
+			height: 32px;
+			font-family: Tahoma, sans-serif;
+			font-size: 14px;
+			position: absolute;
+		}
+		.score_label {
+			width: 320px;
+			height: 32px;
+			font-size: 16px;
+			position: absolute; 
+		}
+		#start, #reset {
+			width: 120px;
+            height: 32px;
+			font-size: 20px;
+			font-family: Tahoma, sans-serif;
+            border-radius: 12px;
+            border: 2px solid #333;
+            background-color: #99D9EA;
+            position: absolute;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+		}
+		#reset {
+            background-color: #DDDDDD;
+		}
+		#start:active {
+            background-color: #A7ECFF;
+        }
+		#yhat_input {
+			width: 120px;
+            height: 24px;
+			font-size: 16px;
+			font-family: Tahoma, sans-serif;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background-color: #ffffff;
+            position: absolute;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+		}
+		input::-webkit-inner-spin-button {
+			-webkit-appearance: none;
+		}
+		#input_submit {
+			width: 24px;
+            height: 24px;
+			font-size: 20px;
+			font-family: Tahoma, sans-serif;
+            border-radius: 4px;
+            border: 1px solid #333;
+            background-color: #3DFF60;
+            position: absolute;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+		}
+		#input_submit:active {
+            background-color: #97FF99;
+        }
+		#prediction_label {
+			width: 100px;
+			height: 24px;
+			border-radius: 8px;
+			border: 1px solid #ccc;
+			background-color: #ddd;
+			opacity: 1;
+			position: absolute;
+			display: flex;
+			text-align: center;
+			justify-content: center;
+            align-items: center;
+		}
+		#prediction_pointer {
+			width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            border: 1px solid #000;
+            background-color: #000;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+		}
+    </style>
+</head>
+<body>
+    <div id="main_canvas" style="position: absolute; left: 0; top: 0;">
+		<canvas id="axis_canvas" width="1080" height="720" style="position: absolute; left: 0; top: 0; z-index: -2; width: 1080px; height: 720px"></canvas>
+		<canvas id="grid_canvas" width="1080" height="720" style="position: absolute; left: 0; top: 0; z-index: -3; width: 1080px; height: 720px"></canvas>
+        <canvas id="line_canvas" width="1080" height="720" style="position: absolute; left: 0; top: 0; z-index: -1; width: 1080px; height: 720px"></canvas>
+		<canvas id="mean_canvas" width="1080" height="720" style="position: absolute; left: 0; top: 0; z-index: -1; width: 1080px; height: 720px"></canvas>
+		<canvas id="error_canvas" width="1080" height="720" style="position: absolute; left: 0; top: 0; z-index: 0; width: 1080px; height: 720px"></canvas>
+		
+		<div class="cp" id="control_point1" style="z-index: 2;"></div>
+		<div class="cp" id="control_point2" style="z-index: 2;"></div>
+		
+		<div class="equation_label" id='equation0' style="left: 40px; width: 220px;"><b>Regression Equation:</b></div>
+		<div class="equation_label" id='equation1' style="left: 260px; width: 60px;">Sales</div>
+		<div class="equation_label" id='equation2' style="left: 320px; width: 30px;">=</div>
+		<b><div class="equation_label" id='slope_sign' style="left: 350px;width: 20px;">&minus;</div></b>
+		<b><div class="equation_label" id='slope_value' style="left: 370px; width: 50px;">0.500</div></b>
+		<div class="equation_label" id='equation3' style="left: 420px; width: 30px;">&times;</div>
+		<div class="equation_label" id='equation4' style="left: 450px; width: 120px;">Temperature</div>
+		<div class="equation_label" id='intercept_sign' style="left: 570px; width: 30px;">&minus;</div>
+		<b><div class="equation_label" id='intercept_value' style="left: 600px; width: 60px;">0</div></b>
+		
+		<div class="score_label" style="left: 700px; top: 160px;"><b>Error Sum of Squares (SSE) </b>:</div>
+		<div class="score_label" id="sse" style="left: 960px; top: 160px;"></div>
+		
+		<div class="score_label" style="left: 700px; top: 200px;"><b>Regression Sum of Squares (SSR) </b>:</div>
+		<div class="score_label" id="ssr" style="left: 960px; top: 200px;"></div>
+		
+		<div class="score_label" style="left: 700px; top: 240px;"><b>Total Sum of Squares (SST) </b>:</div>
+		<div class="score_label" id="sst" style="left: 960px; top: 240px;"></div>
+		
+		<div class="score_label" style="left: 700px; top: 320px;"><b>R-squared = 1 - SSE / SST = </b></div>
+		<div class="score_label" id="r_sq" style="left: 960px; top: 320px;"></div>
+		
+		<div id='prediction_label' style="position: absolute; left: -200px; top: -200px;">(0, 1)</div>
+		<div id="prediction_pointer" style="position: absolute; left: -200px; top: -200px;"></div>
+	</div>
+	
+	<script defer src="script.js"></script>
+</body>
+</html>
