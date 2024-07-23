@@ -383,7 +383,7 @@ function initialize_mean_line() {
 	canvas.lineTo(680, 170)
 	
 	canvas.lineWidth = 3; 
-	canvas.strokeStyle = "#0000ff"
+	canvas.strokeStyle = "#ff0000"
 	canvas.stroke()
 	
 	canvas.beginPath()
@@ -399,7 +399,7 @@ function initialize_mean_line() {
 	canvas.lineTo(680, 250)
 	
 	canvas.lineWidth = 3; 
-	canvas.strokeStyle = "#ff0000"
+	canvas.strokeStyle = "#0000ff"
 	canvas.stroke()
 }
 
@@ -544,7 +544,7 @@ function update_error() {
 		canvas.lineTo(target_canvas_coordinates[0]-2, target_canvas_coordinates[1])
 	}
 	canvas.lineWidth = 3; 
-	canvas.strokeStyle = "#0000ff"
+	canvas.strokeStyle = "#ff0000"
 	canvas.stroke()
 	
 	canvas.beginPath()
@@ -561,7 +561,7 @@ function update_error() {
 		canvas.lineTo(target_canvas_coordinates[0]+2, target_canvas_coordinates[1])
 	}
 	canvas.lineWidth = 3; 
-	canvas.strokeStyle = "#ff0000"
+	canvas.strokeStyle = "#0000ff"
 	canvas.stroke()
 	
 	
